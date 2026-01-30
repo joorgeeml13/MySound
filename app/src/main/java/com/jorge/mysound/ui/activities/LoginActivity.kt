@@ -2,13 +2,12 @@ package com.jorge.mysound.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityOptionsCompat
 import com.jorge.mysound.MainActivity
 import com.jorge.mysound.R
-import com.jorge.mysound.ui.screens.LoginScreen
+import com.jorge.mysound.ui.screens.auth.LoginScreen
 import com.jorge.mysound.ui.theme.MySoundTheme
 
 class LoginActivity : ComponentActivity() {

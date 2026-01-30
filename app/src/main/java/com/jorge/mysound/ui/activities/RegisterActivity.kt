@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityOptionsCompat
 import com.jorge.mysound.R
-import com.jorge.mysound.ui.screens.RegisterScreen
+import com.jorge.mysound.ui.screens.auth.RegisterScreen
 import com.jorge.mysound.ui.theme.MySoundTheme
 
 class RegisterActivity : ComponentActivity() {

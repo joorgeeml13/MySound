@@ -1,4 +1,4 @@
-package com.jorge.mysound.ui.screens
+package com.jorge.mysound.ui.screens.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
