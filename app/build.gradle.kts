@@ -59,4 +59,14 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("androidx.navigation:navigation-compose:2.9.7")
+    val media3_version = "1.2.1" // O la más actual de 2026
+
+    // La base del reproductor (ExoPlayer)
+    implementation("androidx.media3:media3-exoplayer:$media3_version")
+
+    // La sesión para que el sistema sepa que estás reproduciendo algo
+    implementation("androidx.media3:media3-session:$media3_version")
+
+    // UI components (opcional, pero útil)
+    implementation("androidx.media3:media3-ui:$media3_version")
 }

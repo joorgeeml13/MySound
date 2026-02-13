@@ -181,7 +181,15 @@ fun RegisterScreen(
         }
 
         TextButton(onClick = onBackToLogin) {
-            Text(stringResource(R.string.already_account), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                stringResource(R.string.register_prompt),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                stringResource(R.string.register_action),
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

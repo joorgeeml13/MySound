@@ -94,8 +94,14 @@ fun LoginScreen(
 
         TextButton(onClick = onRegisterClick) {
             Text(
-                stringResource(R.string.btn_register),
+                stringResource(R.string.login_prompt),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                stringResource(R.string.login_action),
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }

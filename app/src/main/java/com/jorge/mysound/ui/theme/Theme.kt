@@ -21,7 +21,7 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = Color.Black, // Texto sobre el color primario
     onBackground = TextMainNight,
     onSurface = TextMainNight,
-    onSurfaceVariant = TextSecondaryNight // Para textos secundarios
+    onSurfaceVariant = TextSecondaryNight, // Para textos secundarios
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -33,7 +33,7 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color.White,
     onBackground = TextMainDay,
     onSurface = TextMainDay,
-    onSurfaceVariant = TextSecondaryDay
+    onSurfaceVariant = TextSecondaryDay,
 )
 
 @Composable

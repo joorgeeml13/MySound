@@ -4,16 +4,21 @@
     <string name="user_label">Username</string>
     <string name="pass_label">Password</string>
     <string name="btn_login">Login</string>
-    <string name="btn_register">No account? Register here</string>
 
     <string name="reg_title">Create Account</string>
     <string name="conf_pass_label">Confirm Password</string>
     <string name="btn_register_now">Sign Up</string>
-    <string name="already_account">Already have an account? Log in</string>
+
     <string name="error_pass_match">Passwords do not match</string>
     <string name="email_label">Email address</string>
     <string name="birth_date_label">Birth date</string>
     <string name="terms_check">I accept the terms and conditions</string>
     <string name="error_fields">Please fill all fields</string>
     <string name="error_terms">You must accept the terms</string>
+
+    <string name="register_prompt">Don’t have an account? </string>
+    <string name="register_action">Register</string>
+
+    <string name="login_prompt">Already have an account? </string>
+    <string name="login_action">Log in</string>
 </resources>

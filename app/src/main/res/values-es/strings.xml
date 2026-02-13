@@ -5,16 +5,21 @@
     <string name="user_label">Usuario</string>
     <string name="pass_label">Contraseña</string>
     <string name="btn_login">Entrar</string>
-    <string name="btn_register">¿No tienes cuenta? Regístrate</string>
 
     <string name="reg_title">Crear Cuenta</string>
     <string name="conf_pass_label">Confirmar Contraseña</string>
     <string name="btn_register_now">Registrarse</string>
-    <string name="already_account">¿Ya tienes cuenta? Inicia sesión</string>
+
     <string name="error_pass_match">Las contraseñas no coinciden</string>
     <string name="email_label">Correo electrónico</string>
     <string name="birth_date_label">Fecha de nacimiento</string>
     <string name="terms_check">Acepto los términos y condiciones</string>
     <string name="error_fields">Por favor, rellena todos los campos</string>
     <string name="error_terms">Debes aceptar los términos</string>
+
+    <string name="register_prompt">¿No tienes cuenta? </string>
+    <string name="register_action">Regístrate</string>
+
+    <string name="login_prompt">¿Ya tienes cuenta? </string>
+    <string name="login_action">Inicia sesión</string>
 </resources>
