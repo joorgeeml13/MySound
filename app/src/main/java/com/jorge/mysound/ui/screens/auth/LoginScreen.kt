@@ -1,6 +1,7 @@
 package com.jorge.mysound.ui.screens.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,12 +19,17 @@ import com.jorge.mysound.ui.theme.MySoundTheme
 
 @Composable
 fun LoginScreen(
-    onLoginClick: (String, String) -> Unit,
-    onRegisterClick: () -> Unit) {
+    // AHORA RECIBE EL BOOLEAN DEL CHECKBOX
+    onLoginClick: (String, String, Boolean) -> Unit,
+    onRegisterClick: () -> Unit
+) {
 
     var user by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    // ESTADO DEL CHECKBOX
+    var rememberMe by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -56,7 +62,6 @@ fun LoginScreen(
             label = { Text(text = stringResource(id = R.string.user_label)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
-
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -70,22 +75,31 @@ fun LoginScreen(
             visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (passwordVisible)
-                    painterResource(id = R.drawable.ic_visibility_on) // Necesitarás estos iconos
+                    painterResource(id = R.drawable.ic_visibility_on)
                 else
                     painterResource(id = R.drawable.ic_visibility_off)
 
-                val description = if (passwordVisible) "Hide password" else "Show password"
-
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(painter = image, contentDescription = description)
+                    Icon(painter = image, contentDescription = if (passwordVisible) "Hide" else "Show")
                 }
             }
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        // --- AQUÍ VA EL CHECKBOX ---
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
+            RememberMeCheckbox(
+                isChecked = rememberMe,
+                onCheckedChange = { rememberMe = it }
+            )
+        }
+        // ---------------------------
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { onLoginClick(user, pass) },
+            // PASAMOS LOS 3 ARGUMENTOS AL CLICK
+            onClick = { onLoginClick(user, pass, rememberMe) },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
@@ -94,24 +108,51 @@ fun LoginScreen(
 
         TextButton(onClick = onRegisterClick) {
             Text(
-                stringResource(R.string.login_prompt),
+                stringResource(R.string.register_prompt),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                stringResource(R.string.login_action),
+                stringResource(R.string.register_action),
                 color = MaterialTheme.colorScheme.primary
             )
         }
     }
 }
 
+// --- EL COMPONENTE VISUAL ---
+@Composable
+fun RememberMeCheckbox(
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clickable { onCheckedChange(!isChecked) }
+            .padding(vertical = 4.dp)
+    ) {
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = null, // null porque lo maneja el Row clickable
+            colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "Recordar sesión", // Puedes usar stringResource(R.string.remember_me)
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+// --- PREVIEWS (Arregladas para que compilen con el nuevo parámetro) ---
 @Preview(showBackground = true, name = "Modo Día")
 @Composable
 fun LoginScreenPreview() {
     MySoundTheme(darkTheme = false) {
-        LoginScreen(onLoginClick = { _, _ -> }, onRegisterClick = {})
+        LoginScreen(onLoginClick = { _, _, _ -> }, onRegisterClick = {})
     }
 }
 
@@ -119,22 +160,6 @@ fun LoginScreenPreview() {
 @Composable
 fun LoginScreenDarkPreview() {
     MySoundTheme(darkTheme = true) {
-        LoginScreen(onLoginClick = { _, _ -> }, onRegisterClick = {})
-    }
-}
-
-@Preview(showBackground = true, locale = "es", name = "Preview Inglés")
-@Composable
-fun LoginEnglishPreview() {
-    MySoundTheme {
-        LoginScreen(onLoginClick = { _, _ -> }, onRegisterClick = {})
-    }
-}
-
-@Preview(showBackground = true, locale = "es", name = "Preview Inglés")
-@Composable
-fun LoginEnglishPreviewBlack() {
-    MySoundTheme (darkTheme = true){
-        LoginScreen(onLoginClick = { _, _ -> }, onRegisterClick = {})
+        LoginScreen(onLoginClick = { _, _, _ -> }, onRegisterClick = {})
     }
 }

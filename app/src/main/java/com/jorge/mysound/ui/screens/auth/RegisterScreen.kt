@@ -1,5 +1,6 @@
 package com.jorge.mysound.ui.screens.auth
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -19,10 +20,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
+    // User, Email, BirthDate, Pass
     onRegisterClick: (String, String, String, String) -> Unit,
     onBackToLogin: () -> Unit
 ) {
@@ -44,12 +45,15 @@ fun RegisterScreen(
             confirmButton = {
                 TextButton(onClick = {
                     val date = datePickerState.selectedDateMillis?.let {
-                        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                         formatter.format(Date(it))
                     } ?: ""
                     birthDate = date
                     showDatePicker = false
                 }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
             }
         ) { DatePicker(state = datePickerState) }
     }
@@ -57,7 +61,6 @@ fun RegisterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-
             .background(MaterialTheme.colorScheme.background)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -101,13 +104,13 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Campo Fecha de Nacimiento (Solo lectura, abre el diálogo)
+        // Campo Fecha de Nacimiento
         OutlinedTextField(
             value = birthDate,
             onValueChange = { },
             label = { Text(stringResource(R.string.birth_date_label)) },
             modifier = Modifier.fillMaxWidth(),
-            readOnly = true,
+            readOnly = true, // IMPORTANTE: Solo lectura
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = true }) {
                     Icon(painterResource(R.drawable.ic_calendar), contentDescription = null)
@@ -117,7 +120,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Contraseñas (igual que antes...)
+        // Contraseñas
         OutlinedTextField(
             value = pass,
             onValueChange = { pass = it },
@@ -147,7 +150,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Checkbox de Términos y Condiciones
+        // Checkbox de Términos (ESTO SÍ ES NECESARIO)
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -166,15 +169,23 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón Registrarse con validación
+        // Botón Registrarse
         Button(
             onClick = {
-                if (user.isNotEmpty() && email.isNotEmpty() && birthDate.isNotEmpty() &&
-                    pass == confPass && termsAccepted) {
+                Log.d("DEBUG_AUTH", "Botón pulsado. User: $user, Email: $email, Date: $birthDate, PassMatch: ${pass == confPass}, Terms: $termsAccepted")
+                if (user.isEmpty() || email.isEmpty() || birthDate.isEmpty()) {
+                    Log.e("DEBUG_AUTH", "Error: Hay campos vacíos")
+                    // Aquí deberías mostrar un Toast o un error en la UI
+                } else if (pass != confPass) {
+                    Log.e("DEBUG_AUTH", "Error: Las contraseñas no coinciden")
+                } else if (!termsAccepted) {
+                    Log.e("DEBUG_AUTH", "Error: Términos no aceptados")
+                } else {
+                    Log.d("DEBUG_AUTH", "¡Todo OK! Lanzando petición...")
                     onRegisterClick(user, email, birthDate, pass)
                 }
             },
-            enabled = termsAccepted, // El botón se bloquea si no acepta términos
+            enabled = termsAccepted,
             modifier = Modifier.fillMaxWidth().height(50.dp)
         ) {
             Text(stringResource(R.string.btn_register_now), color = Color.White)
@@ -182,23 +193,24 @@ fun RegisterScreen(
 
         TextButton(onClick = onBackToLogin) {
             Text(
-                stringResource(R.string.register_prompt),
+                stringResource(R.string.login_prompt),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                stringResource(R.string.register_action),
+                stringResource(R.string.login_action),
                 color = MaterialTheme.colorScheme.primary
             )
         }
     }
 }
 
+// --- PREVIEWS (Arregladas) ---
 @Preview(showBackground = true, name = "Modo Día")
 @Composable
 fun RegisterScreenPreview() {
     MySoundTheme(darkTheme = false) {
-        RegisterScreen(onRegisterClick = { _, _, _, _-> }, onBackToLogin = {})
+        RegisterScreen(onRegisterClick = { _, _, _, _ -> }, onBackToLogin = {})
     }
 }
 
@@ -206,22 +218,6 @@ fun RegisterScreenPreview() {
 @Composable
 fun RegisterScreenDarkPreview() {
     MySoundTheme(darkTheme = true) {
-        RegisterScreen(onRegisterClick = { _, _, _, _ -> }, onBackToLogin = {})
-    }
-}
-
-@Preview(showBackground = true, locale = "es", name = "Preview Inglés")
-@Composable
-fun RegisterEnglishPreview() {
-    MySoundTheme {
-        RegisterScreen(onRegisterClick = { _, _, _, _ -> }, onBackToLogin = {})
-    }
-}
-
-@Preview(showBackground = true, locale = "es", name = "Preview Inglés")
-@Composable
-fun RegisterEnglishPreviewBlack() {
-    MySoundTheme (darkTheme = true){
         RegisterScreen(onRegisterClick = { _, _, _, _ -> }, onBackToLogin = {})
     }
 }
