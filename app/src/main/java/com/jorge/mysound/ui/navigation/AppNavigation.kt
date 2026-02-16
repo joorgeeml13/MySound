@@ -11,6 +11,9 @@ import com.jorge.mysound.ui.screens.auth.RegisterScreen
 import com.jorge.mysound.ui.viewmodels.AuthViewModel
 import com.jorge.mysound.ui.viewmodels.AuthState
 import com.jorge.mysound.ui.viewmodels.PlayerViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.jorge.mysound.ui.screens.music.PlaylistDetailScreen // Asegúrate de que la ruta sea esta
 
 @Composable
 fun AppNavigation(
@@ -58,7 +61,32 @@ fun AppNavigation(
         composable("main") {
             MainScreen(
                 playerViewModel = playerViewModel,
-                searchViewModel = viewModel(factory = factory)
+                searchViewModel = viewModel(factory = factory),
+                repository = factory.repository,
+
+                // 🔥 AQUÍ DEFINIMOS QUÉ HACER CUANDO LLEGA EL AVISO
+                onNavigateToPlaylist = { playlistId ->
+                    Log.d("DEBUG_NAV", "El jefe recibe la orden. Navegando a playlist_detail/$playlistId")
+                    navController.navigate("playlist_detail/$playlistId")
+                }
+            )
+        }
+
+        composable(
+            route = "playlist_detail/{playlistId}",
+            arguments = listOf(navArgument("playlistId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            // 1. Recuperamos el ID que viene en la ruta
+            val id = backStackEntry.arguments?.getLong("playlistId") ?: -1L
+
+            Log.d("DEBUG_NAV", "NavHost instanciando pantalla con ID: $id")
+
+            // 2. 🔥 ESTO ES LO QUE TE FALTABA: ¡LLAMAR A LA PANTALLA!
+            PlaylistDetailScreen(
+                playlistId = id,
+                repository = factory.repository,
+                playerViewModel = playerViewModel,
+                onBack = { navController.popBackStack() }
             )
         }
     }

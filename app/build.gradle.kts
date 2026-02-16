@@ -89,6 +89,9 @@ dependencies {
     // Firebase (Ojo con estas, son las que daban el error de META-INF)
     implementation(libs.firebase.appdistribution.gradle)
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.runtime)
+    implementation(libs.androidx.compose.foundation.layout)
 
     // Media3 (Versión unificada)
     val media3_version = "1.2.1"
@@ -110,6 +113,8 @@ dependencies {
     // ViewModel y Seguridad
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    implementation("androidx.compose.material:material-icons-extended:1.6.1")
 
     // Testing
     testImplementation(libs.junit)

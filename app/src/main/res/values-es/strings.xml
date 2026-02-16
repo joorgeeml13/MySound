@@ -23,4 +23,5 @@
     <string name="login_prompt">¿Ya tienes cuenta? </string>
     <string name="login_action">Inicia sesión</string>
     <string name="remember_me">Recuerdame</string>
+    <string name="library">Libreria</string>
 </resources>

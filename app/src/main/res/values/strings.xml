@@ -22,4 +22,5 @@
     <string name="login_prompt">Already have an account? </string>
     <string name="login_action">Log in</string>
     <string name="remember_me">Remember me</string>
+    <string name="library">Library</string>
 </resources>

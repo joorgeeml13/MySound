@@ -20,3 +20,11 @@ data class AuthResponse(val token: String, val username: String?)
 data class LoginRequest(val email: String, val password: String)
 data class RegisterRequest(val email: String, val password: String, val username: String?, val birthDate: String)
 
+data class Playlist(
+    val id: Long?,
+    val name: String,
+    val description: String?,
+    val songs: List<SongResponse> = emptyList(),
+    val createdAt: String? = null,
+    val imageUrl: String?
+)

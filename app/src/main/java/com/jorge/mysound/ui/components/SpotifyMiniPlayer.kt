@@ -55,6 +55,7 @@ fun SpotifyMiniPlayer(
     backgroundColor: Color, // <-- El color que viene del Palette
     artworkUri: String?,   // <-- La URL de la carátula
     onPlayPauseClick: () -> Unit,
+    onPlayerClick: () -> Unit,
     onNextSong: () -> Unit,
     onPreviousSong: () -> Unit,
     modifier: Modifier = Modifier
@@ -77,19 +78,36 @@ fun SpotifyMiniPlayer(
             .padding(horizontal = 8.dp)
             .height(64.dp)
             .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+            .clickable{ onPlayerClick() }
             .draggable(
                 orientation = Orientation.Horizontal,
                 state = rememberDraggableState { delta ->
                     scope.launch { offsetX.snapTo(offsetX.value + delta) }
                 },
                 onDragStopped = {
-                    scope.launch {
-                        if (offsetX.value > 150) onPreviousSong()
-                        else if (offsetX.value < -150) onNextSong()
+                    val threshold = 150f // Umbral de píxeles para disparar la acción
 
+                    scope.launch {
+                        // LÓGICA CORREGIDA SEGÚN TU PETICIÓN:
+                        if (offsetX.value > threshold) {
+                            // Arrastre a la DERECHA (Positivo) -> Siguiente Canción
+                            Log.d("MINIPLAYER", "Swipe Left -> Previous Song")
+                            onPreviousSong()
+                        } else if (offsetX.value < -threshold) {
+                            // Arrastre a la IZQUIERDA (Negativo) -> Canción Anterior
+
+                            Log.d("MINIPLAYER", "Swipe Right -> Next Song")
+                            onNextSong()
+                        }
+
+                        // EFECTO REBOTE (Spring):
+                        // Siempre vuelve al centro después de soltar, haya disparado acción o no
                         offsetX.animateTo(
                             targetValue = 0f,
-                            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
                         )
                     }
                 }
