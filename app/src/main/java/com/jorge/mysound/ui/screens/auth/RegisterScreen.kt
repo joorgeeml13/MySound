@@ -1,7 +1,9 @@
-package com.jorge.mysound.ui.screens
+package com.jorge.mysound.ui.screens.auth
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -9,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,12 +23,13 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
+    // User, Email, BirthDate, Pass
     onRegisterClick: (String, String, String, String) -> Unit,
-    onBackToLogin: () -> Unit
+    onBackToLogin: () -> Unit,
+    errorMessage: String? = null
 ) {
     var user by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -35,7 +40,17 @@ fun RegisterScreen(
     var passVisible by remember { mutableStateOf(false) }
 
     // Estado para el Selector de Fecha
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                // No permitimos fechas futuras
+                return utcTimeMillis <= System.currentTimeMillis()
+            }
+            override fun isSelectableYear(year: Int): Boolean {
+                return year <= 2026
+            }
+        }
+    )
     var showDatePicker by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
@@ -44,12 +59,15 @@ fun RegisterScreen(
             confirmButton = {
                 TextButton(onClick = {
                     val date = datePickerState.selectedDateMillis?.let {
-                        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                         formatter.format(Date(it))
                     } ?: ""
                     birthDate = date
                     showDatePicker = false
                 }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
             }
         ) { DatePicker(state = datePickerState) }
     }
@@ -57,7 +75,6 @@ fun RegisterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-
             .background(MaterialTheme.colorScheme.background)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -96,18 +113,19 @@ fun RegisterScreen(
             onValueChange = { email = it },
             label = { Text(stringResource(R.string.email_label)) },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Campo Fecha de Nacimiento (Solo lectura, abre el diálogo)
+        // Campo Fecha de Nacimiento
         OutlinedTextField(
             value = birthDate,
             onValueChange = { },
             label = { Text(stringResource(R.string.birth_date_label)) },
             modifier = Modifier.fillMaxWidth(),
-            readOnly = true,
+            readOnly = true, // IMPORTANTE: Solo lectura
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = true }) {
                     Icon(painterResource(R.drawable.ic_calendar), contentDescription = null)
@@ -117,7 +135,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Contraseñas (igual que antes...)
+        // Contraseñas
         OutlinedTextField(
             value = pass,
             onValueChange = { pass = it },
@@ -147,7 +165,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Checkbox de Términos y Condiciones
+        // Checkbox de Términos (ESTO SÍ ES NECESARIO)
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -164,33 +182,60 @@ fun RegisterScreen(
             )
         }
 
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error, // Rojo de Material3
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(vertical = 8.dp),
+                fontWeight = FontWeight.Bold
+            )
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón Registrarse con validación
+        // Botón Registrarse
         Button(
             onClick = {
-                if (user.isNotEmpty() && email.isNotEmpty() && birthDate.isNotEmpty() &&
-                    pass == confPass && termsAccepted) {
-                    onRegisterClick(user, email, birthDate, pass)
+                Log.d("DEBUG_AUTH", "Botón pulsado. User: $user, Email: $email, Date: $birthDate, PassMatch: ${pass == confPass}, Terms: $termsAccepted")
+                if (user.isEmpty() || email.isEmpty() || birthDate.isEmpty()) {
+                    Log.e("DEBUG_AUTH", "Error: Hay campos vacíos")
+                    // Aquí deberías mostrar un Toast o un error en la UI
+                } else if (pass != confPass) {
+                    Log.e("DEBUG_AUTH", "Error: Las contraseñas no coinciden")
+                } else if (!termsAccepted) {
+                    Log.e("DEBUG_AUTH", "Error: Términos no aceptados")
+                } else {
+                    Log.d("DEBUG_AUTH", "¡Todo OK! Lanzando petición...")
+                    onRegisterClick(email, pass, birthDate, user)
                 }
             },
-            enabled = termsAccepted, // El botón se bloquea si no acepta términos
+            enabled = termsAccepted,
             modifier = Modifier.fillMaxWidth().height(50.dp)
         ) {
             Text(stringResource(R.string.btn_register_now), color = Color.White)
         }
 
         TextButton(onClick = onBackToLogin) {
-            Text(stringResource(R.string.already_account), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                stringResource(R.string.login_prompt),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                stringResource(R.string.login_action),
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
 
+// --- PREVIEWS (Arregladas) ---
 @Preview(showBackground = true, name = "Modo Día")
 @Composable
 fun RegisterScreenPreview() {
     MySoundTheme(darkTheme = false) {
-        RegisterScreen(onRegisterClick = { _, _, _, _-> }, onBackToLogin = {})
+        RegisterScreen(onRegisterClick = { _, _, _, _ -> }, onBackToLogin = {})
     }
 }
 
@@ -198,22 +243,6 @@ fun RegisterScreenPreview() {
 @Composable
 fun RegisterScreenDarkPreview() {
     MySoundTheme(darkTheme = true) {
-        RegisterScreen(onRegisterClick = { _, _, _, _ -> }, onBackToLogin = {})
-    }
-}
-
-@Preview(showBackground = true, locale = "es", name = "Preview Inglés")
-@Composable
-fun RegisterEnglishPreview() {
-    MySoundTheme {
-        RegisterScreen(onRegisterClick = { _, _, _, _ -> }, onBackToLogin = {})
-    }
-}
-
-@Preview(showBackground = true, locale = "es", name = "Preview Inglés")
-@Composable
-fun RegisterEnglishPreviewBlack() {
-    MySoundTheme (darkTheme = true){
         RegisterScreen(onRegisterClick = { _, _, _, _ -> }, onBackToLogin = {})
     }
 }

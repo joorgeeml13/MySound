@@ -25,3 +25,6 @@ val PurpleLightNight = Color(0xFF4A148C)
 val BackgroundNight = Color(0xFF121212)
 val TextMainNight = Color(0xFFFFFFFF)
 val TextSecondaryNight = Color(0xFFB3B3B3)
+
+val BackgroundOnSurfaceNight = Color(0xFFB3B3B3)
+val BackgroundOnSurfaceDay = Color(0xFFB3B3B3)

@@ -1,20 +1,83 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MySound</string>
+
     <string name="login_title">Bienvenido</string>
     <string name="user_label">Usuario</string>
     <string name="pass_label">Contraseña</string>
     <string name="btn_login">Entrar</string>
-    <string name="btn_register">¿No tienes cuenta? Regístrate</string>
+    <string name="login_prompt">¿Ya tienes cuenta? </string>
+    <string name="login_action">Inicia sesión</string>
+    <string name="remember_me">Recuérdame</string>
 
     <string name="reg_title">Crear Cuenta</string>
     <string name="conf_pass_label">Confirmar Contraseña</string>
     <string name="btn_register_now">Registrarse</string>
-    <string name="already_account">¿Ya tienes cuenta? Inicia sesión</string>
-    <string name="error_pass_match">Las contraseñas no coinciden</string>
     <string name="email_label">Correo electrónico</string>
     <string name="birth_date_label">Fecha de nacimiento</string>
     <string name="terms_check">Acepto los términos y condiciones</string>
+    <string name="register_prompt">¿No tienes cuenta? </string>
+    <string name="register_action">Regístrate</string>
+
+    <string name="error_pass_match">Las contraseñas no coinciden</string>
     <string name="error_fields">Por favor, rellena todos los campos</string>
     <string name="error_terms">Debes aceptar los términos</string>
+    <string name="error_auth_network">Fallo de conexión. Revisa tu internet o el servidor.</string>
+    <string name="error_auth_unknown">Error desconocido en la autenticación.</string>
+    <string name="error_auth_invalid">Credenciales inválidas. Revisa los datos.</string>
+    <string name="auth_remember_me">Mantener sesión iniciada</string>
+
+    <string name="home_playlists_title">Tus Listas</string>
+    <string name="home_match_title">Tu alma gemela musical</string>
+    <string name="home_match_description">También ama a %1$s</string>
+    <string name="home_match_compatibility">¡Tenéis un %1$d%% de compatibilidad!</string>
+    <string name="error_home_no_data">No hay datos disponibles en este momento.</string>
+    <string name="error_home_generic">Error al conectar con el servidor.</string>
+
+    <string name="library">Biblioteca</string>
+    <string name="library_title">Biblioteca</string>
+    <string name="library_new_playlist">Nueva Playlist</string>
+    <string name="library_playlist_hint">Ponle nombre a tu lista:</string>
+    <string name="library_placeholder_name">Mi lista #1</string>
+    <string name="library_songs_count">%1$d canciones</string>
+    <string name="btn_create">CREAR</string>
+    <string name="btn_cancel">CANCELAR</string>
+    <string name="loading">Cargando…</string>
+    <string name="error_loading">Error cargando datos</string>
+
+    <string name="player_unknown_artist">Artista desconocido</string>
+    <string name="player_unknown_title">Título desconocido</string>
+    <string name="player_queue_empty">La cola está vacía</string>
+    <string name="player_error_media">Error al reproducir el archivo</string>
+
+    <string name="playlist_back_desc">Volver</string>
+    <string name="playlist_play_all">Reproducir todo</string>
+    <string name="playlist_sort_label">Orden: %1$s</string>
+    <string name="playlist_sort_added">Añadido</string>
+    <string name="playlist_sort_title">Título</string>
+    <string name="playlist_sort_artist">Artista</string>
+    <string name="playlist_sort_menu_recent">Recientes (Default)</string>
+    <string name="playlist_sort_menu_title">Título (A-Z)</string>
+    <string name="playlist_sort_menu_artist">Artista (A-Z)</string>
+    <string name="playlist_empty">Esta lista está vacía. ¡Añade música!</string>
+    <string name="playlist_error_id">Error al cargar la playlist (ID: %1$d)</string>
+
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_appearance">Apariencia</string>
+    <string name="settings_dark_mode">Modo Oscuro</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_lang_es">Español</string>
+    <string name="settings_lang_en">Inglés</string>
+
+    <string name="profile_top_genre">Género Top</string>
+    <string name="profile_total_songs">Canciones</string>
+    <string name="profile_section_account">Cuenta</string>
+    <string name="profile_logout">Cerrar Sesión</string>
+    <string name="profile_default_user">Usuario</string>
+    <string name="profile_edit_avatar">Editar avatar</string>
+
+    <string name="search_hint">Busca una canción, artista...</string>
+    <string name="search_add_title">Añadir a Playlist</string>
+    <string name="search_add_message">Elige dónde guardar "%1$s":</string>
+    <string name="search_no_playlists">No tienes playlists creadas todavía.</string>
+    <string name="search_artist_unknown">Artista Desconocido</string>
 </resources>

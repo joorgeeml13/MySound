@@ -1,19 +1,83 @@
 <resources>
     <string name="app_name">MySound</string>
+
     <string name="login_title">Welcome</string>
     <string name="user_label">Username</string>
     <string name="pass_label">Password</string>
     <string name="btn_login">Login</string>
-    <string name="btn_register">No account? Register here</string>
+    <string name="login_prompt">Already have an account? </string>
+    <string name="login_action">Log in</string>
+    <string name="remember_me">Remember me</string>
 
     <string name="reg_title">Create Account</string>
     <string name="conf_pass_label">Confirm Password</string>
     <string name="btn_register_now">Sign Up</string>
-    <string name="already_account">Already have an account? Log in</string>
-    <string name="error_pass_match">Passwords do not match</string>
     <string name="email_label">Email address</string>
     <string name="birth_date_label">Birth date</string>
     <string name="terms_check">I accept the terms and conditions</string>
+    <string name="register_prompt">Don’t have an account? </string>
+    <string name="register_action">Register</string>
+
+    <string name="error_pass_match">Passwords do not match</string>
     <string name="error_fields">Please fill all fields</string>
     <string name="error_terms">You must accept the terms</string>
+    <string name="error_auth_network">Connection failed. Check your internet or server.</string>
+    <string name="error_auth_unknown">Unknown error during authentication.</string>
+    <string name="error_auth_invalid">Invalid credentials. Please check your data.</string>
+    <string name="auth_remember_me">Remember me</string>
+
+    <string name="home_playlists_title">Your Playlists</string>
+    <string name="home_match_title">Your musical soulmate</string>
+    <string name="home_match_description">Also loves %1$s</string>
+    <string name="home_match_compatibility">You have a %1$d%% compatibility!</string>
+    <string name="error_home_no_data">No data available at this time.</string>
+    <string name="error_home_generic">Error connecting to the server.</string>
+
+    <string name="library">Library</string>
+    <string name="library_title">Library</string>
+    <string name="library_new_playlist">New Playlist</string>
+    <string name="library_playlist_hint">Give your list a name:</string>
+    <string name="library_placeholder_name">My playlist #1</string>
+    <string name="library_songs_count">%1$d songs</string>
+    <string name="btn_create">CREATE</string>
+    <string name="btn_cancel">CANCEL</string>
+    <string name="loading">Loading…</string>
+    <string name="error_loading">Error loading data</string>
+
+    <string name="player_unknown_artist">Unknown Artist</string>
+    <string name="player_unknown_title">Unknown Title</string>
+    <string name="player_queue_empty">Playback queue is empty</string>
+    <string name="player_error_media">Error playing media file</string>
+
+    <string name="playlist_back_desc">Back</string>
+    <string name="playlist_play_all">Play all</string>
+    <string name="playlist_sort_label">Sort: %1$s</string>
+    <string name="playlist_sort_added">Added</string>
+    <string name="playlist_sort_title">Title</string>
+    <string name="playlist_sort_artist">Artist</string>
+    <string name="playlist_sort_menu_recent">Recent (Default)</string>
+    <string name="playlist_sort_menu_title">Title (A-Z)</string>
+    <string name="playlist_sort_menu_artist">Artist (A-Z)</string>
+    <string name="playlist_empty">This playlist is empty. Add some music!</string>
+    <string name="playlist_error_id">Error loading playlist (ID: %1$d)</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_dark_mode">Dark Mode</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_lang_es">Spanish</string>
+    <string name="settings_lang_en">English</string>
+
+    <string name="profile_top_genre">Top Genre</string>
+    <string name="profile_total_songs">Songs</string>
+    <string name="profile_section_account">Account</string>
+    <string name="profile_logout">Log Out</string>
+    <string name="profile_default_user">User</string>
+    <string name="profile_edit_avatar">Edit avatar</string>
+
+    <string name="search_hint">Search for a song, artist...</string>
+    <string name="search_add_title">Add to Playlist</string>
+    <string name="search_add_message">Choose a playlist for "%1$s":</string>
+    <string name="search_no_playlists">No playlists created yet.</string>
+    <string name="search_artist_unknown">Unknown Artist</string>
 </resources>
