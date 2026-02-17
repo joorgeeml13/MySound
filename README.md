@@ -11,16 +11,6 @@ This project demonstrates advanced concepts such as foreground services for medi
 
 ---
 
-## 📱 Screenshots
-
-| Home & Match | Player | Library | Profile |
-|:---:|:---:|:---:|:---:|
-| ![Home](screenshots/home.png) | ![Player](screenshots/player.png) | ![Library](screenshots/library.png) | ![Profile](screenshots/profile.png) |
-
-*(Note: Replace these paths with your actual screenshots)*
-
----
-
 ## 🚀 Key Features
 
 ### 🎧 Core Experience
