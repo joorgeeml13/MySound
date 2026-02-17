@@ -19,11 +19,17 @@ import com.jorge.mysound.util.TokenManager
 import com.jorge.mysound.data.remote.RetrofitClient
 import com.jorge.mysound.data.repository.MusicRepository
 
+/**
+ * MediaPlaybackService: Servicio en primer plano (Foreground Service) encargado de la
+ * reproducción de audio persistente. Implementa Media3 para integrarse con los controles
+ * del sistema y gestionar la sesión multimedia de forma independiente a la UI.
+ */
 class MediaPlaybackService : MediaSessionService() {
+
     private var mediaSession: MediaSession? = null
     private lateinit var player: ExoPlayer
 
-    // Inyectamos Repo y TokenManager
+    // Dependencias inyectadas para la gestión de datos y seguridad
     private lateinit var musicRepository: MusicRepository
     private lateinit var tokenManager: TokenManager
 
@@ -31,19 +37,31 @@ class MediaPlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Inicializamos dependencias (El Service es un Context)
+        // Inicialización de componentes de red y persistencia
         val apiService = RetrofitClient.getInstance(this)
         musicRepository = MusicRepository(apiService)
-        tokenManager = TokenManager(this) // ¡Necesitamos esto para el streaming!
+        tokenManager = TokenManager(this)
 
-        // 2. Buffer para que no se corte con mal internet
+        /**
+         * Estrategia de Buffering (LoadControl):
+         * Configuramos el buffer para mitigar micro-cortes en redes móviles inestables.
+         * - Min Buffer: 30s | Max Buffer: 50s | Playback Buffer: 1s
+         */
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
-                20_000, 60_000, 1_000, 2_000
-            ).build()
+                30_000, // Duración mínima de buffer
+                50_000, // Duración máxima de buffer
+                1_000,  // Buffer necesario para iniciar reproducción
+                5_000   // Buffer necesario para reanudar tras pausa
+            )
+            .setBackBuffer(10_000, true)
+            .build()
 
-        // 3. LA MAGIA DEL TOKEN: Configuramos el DataSource con la cabecera Auth
-        // Si no haces esto, te comerás un 403 Forbidden
+        /**
+         * Configuración de Red con Autenticación JWT:
+         * Inyectamos el token de seguridad directamente en las propiedades de la petición HTTP.
+         * Esto previene errores 403 (Forbidden) al acceder a los recursos de streaming protegidos.
+         */
         val token = tokenManager.getToken()
         val headers = if (token != null) {
             mapOf("Authorization" to "Bearer $token")
@@ -53,17 +71,18 @@ class MediaPlaybackService : MediaSessionService() {
 
         val dataSourceFactory = DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(10_000)
-            .setReadTimeoutMs(10_000)
-            .setDefaultRequestProperties(headers) // <--- ¡AQUÍ ESTÁ LA CLAVE!
+            .setConnectTimeoutMs(15_000)
+            .setReadTimeoutMs(15_000)
+            .setDefaultRequestProperties(headers)
 
-        // 4. Extractores (Quitamos configuraciones raras que pueden dar error de versión)
         val extractorsFactory = DefaultExtractorsFactory()
-
         val renderersFactory = DefaultRenderersFactory(this)
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
 
-        // 5. Construimos el Player
+        /**
+         * Construcción de la instancia de ExoPlayer.
+         * Se integra la factoría de fuentes de datos personalizada con soporte para JWT.
+         */
         player = ExoPlayer.Builder(this)
             .setRenderersFactory(renderersFactory)
             .setMediaSourceFactory(
@@ -73,17 +92,25 @@ class MediaPlaybackService : MediaSessionService() {
             .setLoadControl(loadControl)
             .build()
 
+        // Vinculación del Player con la Sesión Multimedia
         mediaSession = MediaSession.Builder(this, player)
             .setCallback(MediaSessionCallback())
             .build()
     }
 
+    /**
+     * El sistema invoca este método para obtener la sesión cuando un controlador externo se conecta.
+     */
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
         return mediaSession
     }
 
+    /**
+     * Liberación de recursos críticos para evitar fugas de memoria (Memory Leaks).
+     */
     override fun onDestroy() {
         mediaSession?.run {
+            player.stop()
             player.release()
             release()
             mediaSession = null
@@ -91,26 +118,28 @@ class MediaPlaybackService : MediaSessionService() {
         super.onDestroy()
     }
 
-    // --- CALLBACK INTERNO ---
+    /**
+     * MediaSessionCallback: Intercepta comandos y cambios en la lista de reproducción.
+     */
     private inner class MediaSessionCallback : MediaSession.Callback {
 
-        // Cuidado con los imports de Futures y ListenableFuture
+        /**
+         * Se dispara cuando se añaden nuevos elementos a la cola.
+         * Aquí resolvemos la URL de streaming final basada en el mediaId de la canción.
+         */
         override fun onAddMediaItems(
             mediaSession: MediaSession,
             controller: MediaSession.ControllerInfo,
             mediaItems: MutableList<MediaItem>
-        ): ListenableFuture<List<MediaItem>> { // <--- OJO: Devuelve List, no MutableList
+        ): ListenableFuture<List<MediaItem>> {
 
             val updatedItems = mediaItems.map { item ->
                 if (item.localConfiguration?.uri == null || item.localConfiguration?.uri == Uri.EMPTY) {
-                    val songId = item.mediaId.toLong()
-
-                    // Usamos la variable correcta: musicRepository
-                    // Asegúrate de que getStreamUrl devuelva un String, NO una llamada a Retrofit suspend
+                    val songId = item.mediaId.toLongOrNull() ?: -1L
                     val streamUrl = musicRepository.getStreamUrl(songId)
 
                     item.buildUpon()
-                        .setUri(Uri.parse(streamUrl)) // Parseamos el String a Uri
+                        .setUri(Uri.parse(streamUrl))
                         .setMediaMetadata(item.mediaMetadata)
                         .build()
                 } else {
@@ -118,7 +147,6 @@ class MediaPlaybackService : MediaSessionService() {
                 }
             }
 
-            // Devolvemos la lista actualizada (Futures.immediateFuture espera un List)
             return Futures.immediateFuture(updatedItems)
         }
 
@@ -127,6 +155,7 @@ class MediaPlaybackService : MediaSessionService() {
             session: MediaSession,
             controller: MediaSession.ControllerInfo
         ): MediaSession.ConnectionResult {
+            // Aceptamos la conexión y otorgamos todos los comandos de control disponibles
             val sessionCommands = MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon().build()
             val playerCommands = Player.Commands.Builder().addAllCommands().build()
             return MediaSession.ConnectionResult.accept(sessionCommands, playerCommands)

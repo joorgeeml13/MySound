@@ -3,129 +3,122 @@ package com.jorge.mysound.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.jorge.mysound.data.repository.MusicRepository
+import androidx.compose.ui.res.stringResource
+import com.jorge.mysound.R
+import com.jorge.mysound.ui.AppViewModelFactory
 import com.jorge.mysound.ui.components.PlayerFullScreen
-import com.jorge.mysound.ui.components.SpotifyMiniPlayer
-import com.jorge.mysound.ui.navigation.Screen
+import com.jorge.mysound.ui.components.SpotifyFloatingPlayer
+import com.jorge.mysound.ui.navigation.AppNavigation
 import com.jorge.mysound.ui.navigation.SpotifyNavBar
-import com.jorge.mysound.ui.screens.main.HomeScreen
-import com.jorge.mysound.ui.screens.main.LibraryScreen
-import com.jorge.mysound.ui.screens.main.ProfileScreen
-import com.jorge.mysound.ui.screens.main.SearchScreen
 import com.jorge.mysound.ui.viewmodels.PlayerViewModel
-import com.jorge.mysound.ui.viewmodels.PlaylistViewModel
-import com.jorge.mysound.ui.viewmodels.SearchViewModel
+import androidx.navigation.compose.rememberNavController
 
+/**
+ * MainScreen: Orquestador principal de la interfaz de usuario.
+ * Gestiona el Scaffold global, el Host de navegación y la lógica de visibilidad
+ * del reproductor (Mini Player vs FullScreen Player).
+ */
 @Composable
 fun MainScreen(
     playerViewModel: PlayerViewModel,
-    searchViewModel: SearchViewModel,
-    repository: MusicRepository,
-    onNavigateToPlaylist: (Long) -> Unit
-){
+    factory: AppViewModelFactory,
+    onLogout: () -> Unit
+) {
+    // Controlador de navegación para gestionar el flujo entre pantallas
     val navController = rememberNavController()
 
-    // Observando el estado del reproductor
+    // Observación de estados reactivos del reproductor multimedia
     val currentTitle by playerViewModel.currentSongTitle.collectAsState()
     val currentArtist by playerViewModel.currentArtist.collectAsState()
     val isPlaying by playerViewModel.isPlaying.collectAsState()
     val artworkUri by playerViewModel.currentArtworkUri.collectAsState()
     val bgColor by playerViewModel.miniPlayerColor.collectAsState()
+    val currentPos by playerViewModel.currentPosition.collectAsState()
+    val totalDuration by playerViewModel.duration.collectAsState()
 
-    val playlistViewModel: PlaylistViewModel = viewModel(
-        factory = PlaylistViewModel.Factory(repository)
-    )
-
-    // Estado para controlar la visibilidad del reproductor completo
+    // Estado persistente para controlar la transición al reproductor de pantalla completa
     var isFullScreenVisible by remember { mutableStateOf(false) }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            // Solo mostramos el miniplayer y la nav bar si NO estamos en pantalla completa
+            // La barra de navegación solo es visible si no estamos en pantalla completa
             if (!isFullScreenVisible) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (currentTitle != null) {
-                        SpotifyMiniPlayer(
-                            songTitle = currentTitle ?: "Canción",
-                            artistName = currentArtist ?: "Artista",
-                            isPlaying = isPlaying,
-                            backgroundColor = bgColor,
-                            artworkUri = artworkUri?.toString(),
-                            // 🔥 Abrimos el reproductor completo al hacer click
-                            onPlayerClick = { isFullScreenVisible = true },
-                            onPlayPauseClick = { playerViewModel.togglePlayPause() },
-                            onNextSong = { playerViewModel.skipToNext() },
-                            onPreviousSong = { playerViewModel.skipToPrevious() }
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    SpotifyNavBar(navController)
-                }
+                SpotifyNavBar(navController)
             }
         },
     ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Home.route,
-            // OJO: Si ocultamos el bottom bar, el padding cambia, tenlo en cuenta
-            modifier = Modifier.padding(bottom = if (isFullScreenVisible) 0.dp else innerPadding.calculateBottomPadding())
+        /**
+         * Estructura de capas:
+         * 1. Contenedor de navegación (Pantallas de contenido).
+         * 2. Mini Player (Superpuesto en la parte inferior).
+         */
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
                 .statusBarsPadding()
         ) {
-            composable(Screen.Home.route) { HomeScreen() }
-            composable(Screen.Search.route) { SearchScreen(searchViewModel, playerViewModel) }
-            composable(Screen.Library.route) {
-                LibraryScreen(
+            // Host principal de navegación
+            AppNavigation(
+                factory = factory,
+                playerViewModel = playerViewModel,
+                onLogout = onLogout
+            )
 
-                    onPlaylistClick = onNavigateToPlaylist,
-                    playerViewModel = playerViewModel,
-                    playlistViewModel = playlistViewModel
+            // Lógica de visualización del MiniPlayer flotante
+            if (!isFullScreenVisible && currentTitle != null) {
+                SpotifyFloatingPlayer(
+                    songTitle = currentTitle ?: stringResource(R.string.player_unknown_title),
+                    artistName = currentArtist ?: stringResource(R.string.player_unknown_artist),
+                    isPlaying = isPlaying,
+                    backgroundColor = bgColor,
+                    artworkUri = artworkUri?.toString(),
+                    onPlayerClick = { isFullScreenVisible = true },
+                    onPlayPauseClick = { playerViewModel.togglePlayPause() },
+                    onNextSong = { playerViewModel.skipToNext() },
+                    onPreviousSong = { playerViewModel.skipToPrevious() },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
                 )
             }
-            composable(Screen.Profile.route) { ProfileScreen() }
         }
     }
 
-    // 🎭 REPRODUCTOR PANTALLA COMPLETA CON ANIMACIÓN
+    /**
+     * Capa Superior: Reproductor Pantalla Completa.
+     * Implementa animaciones de entrada y salida vertical para mejorar la experiencia de usuario (UX).
+     */
+
     AnimatedVisibility(
         visible = isFullScreenVisible,
-        enter = slideInVertically(initialOffsetY = { it }), // Sube desde abajo
-        exit = slideOutVertically(targetOffsetY = { it })   // Baja al cerrar
+        enter = slideInVertically(initialOffsetY = { it }),
+        exit = slideOutVertically(targetOffsetY = { it })
     ) {
         PlayerFullScreen(
-
-            songTitle = currentTitle ?: "",
-            artistName = currentArtist ?: "",
+            songTitle = currentTitle ?: stringResource(R.string.player_unknown_title),
+            artistName = currentArtist ?: stringResource(R.string.player_unknown_artist),
             artworkUri = artworkUri?.toString(),
             isPlaying = isPlaying,
             backgroundColor = bgColor,
-            onDismiss = { isFullScreenVisible = false }, // Volver al miniplayer
+            onDismiss = { isFullScreenVisible = false },
             onPlayPause = { playerViewModel.togglePlayPause() },
             onNext = { playerViewModel.skipToNext() },
-            onPrevious = { playerViewModel.skipToPrevious() }
+            onPrevious = { playerViewModel.skipToPrevious() },
+            currentPosition = currentPos,
+            duration = totalDuration,
+            onSeek = { newPos -> playerViewModel.seekTo(newPos) }
         )
     }
 }

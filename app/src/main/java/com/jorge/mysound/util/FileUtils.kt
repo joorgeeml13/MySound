@@ -2,30 +2,50 @@ package com.jorge.mysound.util
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
 
-// 🔥 ESTA FUNCIÓN ES ORO PURO. CÓPIALA Y GUÁRDALA.
+/**
+ * FileUtils: Utilidades para la manipulación de archivos y flujos de datos.
+ * Proporciona métodos para convertir URIs de contenido en archivos temporales
+ * compatibles con peticiones Multipart/form-data.
+ */
+
+/**
+ * Convierte una [Uri] de contenido (proporcionada por el sistema) en un [File] físico.
+ * Este proceso es necesario para poder enviar imágenes o archivos al servidor a través de Retrofit.
+ * * @param context El contexto de la aplicación para acceder al ContentResolver.
+ * @param uri La URI del archivo seleccionado (ej. desde la galería).
+ * @return Un objeto [File] temporal que contiene la copia del archivo, o null si ocurre un error.
+ */
 fun uriToFile(context: Context, uri: Uri): File? {
-    try {
+    return try {
         val contentResolver = context.contentResolver
-        // 1. Creamos un archivo temporal en la caché de la app
-        val tempFile = File.createTempFile("upload_image", ".jpg", context.cacheDir)
 
-        // 2. Abrimos el grifo del sistema para leer la URI
-        val inputStream = contentResolver.openInputStream(uri) ?: return null
+        // Creamos un archivo temporal en el directorio de caché para no persistir basura innecesaria
+        val tempFile = File.createTempFile("upload_tmp_", ".jpg", context.cacheDir)
+
+        // Abrimos el flujo de entrada desde la URI y el de salida hacia el archivo temporal
+        val inputStream: InputStream? = contentResolver.openInputStream(uri)
         val outputStream = FileOutputStream(tempFile)
 
-        // 3. Copiamos los datos byte a byte
-        inputStream.copyTo(outputStream)
+        if (inputStream == null) return null
 
-        // 4. Cerramos el grifo
-        inputStream.close()
-        outputStream.close()
+        /**
+         * Utilizamos la función .use de Kotlin, que garantiza el cierre de los streams
+         * incluso si ocurre una excepción durante la copia, evitando fugas de memoria.
+         */
+        inputStream.use { input ->
+            outputStream.use { output ->
+                input.copyTo(output)
+            }
+        }
 
-        return tempFile
+        tempFile
     } catch (e: Exception) {
-        e.printStackTrace()
-        return null
+        Log.e("FileUtils", "Error al convertir URI a File: ${e.message}")
+        null
     }
 }

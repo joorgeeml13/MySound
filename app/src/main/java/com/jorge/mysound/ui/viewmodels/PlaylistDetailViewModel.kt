@@ -62,7 +62,7 @@ class PlaylistDetailViewModel(
                     Log.d("DEBUG_UPLOAD", "Archivo creado: ${file.path}")
 
                     // 2. Subimos al servidor
-                    repository.uploadImage(playlistId, file)
+                    repository.uploadPlaylistImage(playlistId, file)
 
                     // 3. Recargamos la playlist para ver la foto nueva
                     loadPlaylist()

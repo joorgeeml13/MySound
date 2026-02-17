@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.appcompat)
 
     // Media3 (Versión unificada)
     val media3_version = "1.2.1"

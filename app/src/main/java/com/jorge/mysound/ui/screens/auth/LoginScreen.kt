@@ -3,6 +3,7 @@ package com.jorge.mysound.ui.screens.auth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -10,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,7 +24,8 @@ import com.jorge.mysound.ui.theme.MySoundTheme
 fun LoginScreen(
     // AHORA RECIBE EL BOOLEAN DEL CHECKBOX
     onLoginClick: (String, String, Boolean) -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    errorMessage: String? = null
 ) {
 
     var user by remember { mutableStateOf("") }
@@ -59,9 +63,10 @@ fun LoginScreen(
         OutlinedTextField(
             value = user,
             onValueChange = { user = it },
-            label = { Text(text = stringResource(id = R.string.user_label)) },
+            label = { Text(text = stringResource(id = R.string.email_label)) },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -96,6 +101,17 @@ fun LoginScreen(
         // ---------------------------
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error, // Rojo de Material3
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(vertical = 8.dp),
+                fontWeight = FontWeight.Bold
+            )
+        }
+
 
         Button(
             // PASAMOS LOS 3 ARGUMENTOS AL CLICK

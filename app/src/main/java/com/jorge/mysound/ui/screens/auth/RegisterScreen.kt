@@ -3,6 +3,7 @@ package com.jorge.mysound.ui.screens.auth
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -10,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,7 +28,8 @@ import java.util.Locale
 fun RegisterScreen(
     // User, Email, BirthDate, Pass
     onRegisterClick: (String, String, String, String) -> Unit,
-    onBackToLogin: () -> Unit
+    onBackToLogin: () -> Unit,
+    errorMessage: String? = null
 ) {
     var user by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -36,7 +40,17 @@ fun RegisterScreen(
     var passVisible by remember { mutableStateOf(false) }
 
     // Estado para el Selector de Fecha
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                // No permitimos fechas futuras
+                return utcTimeMillis <= System.currentTimeMillis()
+            }
+            override fun isSelectableYear(year: Int): Boolean {
+                return year <= 2026
+            }
+        }
+    )
     var showDatePicker by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
@@ -99,7 +113,8 @@ fun RegisterScreen(
             onValueChange = { email = it },
             label = { Text(stringResource(R.string.email_label)) },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -167,6 +182,16 @@ fun RegisterScreen(
             )
         }
 
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error, // Rojo de Material3
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(vertical = 8.dp),
+                fontWeight = FontWeight.Bold
+            )
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         // Botón Registrarse
@@ -182,7 +207,7 @@ fun RegisterScreen(
                     Log.e("DEBUG_AUTH", "Error: Términos no aceptados")
                 } else {
                     Log.d("DEBUG_AUTH", "¡Todo OK! Lanzando petición...")
-                    onRegisterClick(user, email, birthDate, pass)
+                    onRegisterClick(email, pass, birthDate, user)
                 }
             },
             enabled = termsAccepted,

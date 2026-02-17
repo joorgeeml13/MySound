@@ -20,11 +20,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.jorge.mysound.ui.theme.MySoundTheme
 
-// Asegúrate de tener tu clase Screen definida en algún sitio
-// import com.jorge.mysound.ui.navigation.Screen
 
 @Composable
 fun SpotifyNavBar(navController: NavHostController) {
@@ -37,58 +33,60 @@ fun SpotifyNavBar(navController: NavHostController) {
         Screen.Profile
     )
 
-    // HE BORRADO LA LÍNEA DE AuthViewModel.authState PORQUE AQUÍ NO PINTA NADA
-    // Y DABA ERROR DE COMPILACIÓN.
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    Surface(
-        color = Color.Black.copy(alpha = 0.05f),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        NavigationBar(
-            containerColor = Color.Transparent,
-            modifier = Modifier.height(80.dp),
-            tonalElevation = 0.dp
-        ) {
-            screens.forEach { screen ->
-                val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
 
-                NavigationBarItem(
-                    selected = isSelected,
-                    // PON LA LÓGICA DE NAVEGACIÓN AQUÍ, NO EN EL ICONO
-                    onClick = {
-                        if (!isSelected) {
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.height(80.dp),
+        tonalElevation = 0.dp
+    ) {
+        screens.forEach { screen ->
+            val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true ||
+                    // Caso 1: Estamos en el detalle de una playlist -> Mantiene encendido "Library"
+                    (screen.route == Screen.Library.route && currentDestination?.route?.contains("playlist_detail") == true) ||
+                    // Caso 2: Estamos en Ajustes o Editar Perfil -> Mantiene encendido "Profile"
+                    (screen.route == Screen.Profile.route && (
+                            currentDestination?.route?.contains("settings") == true ||
+                                    currentDestination?.route?.contains("edit_profile") == true
+                            ))
+
+            NavigationBarItem(
+                selected = isSelected,
+                // PON LA LÓGICA DE NAVEGACIÓN AQUÍ, NO EN EL ICONO
+                onClick = {
+                    if (!isSelected) {
+                        // Navegación normal cambiando de pestaña
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = (screen.route != Screen.Library.route)
                         }
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(screen.icon),
-                            contentDescription = null,
-                            modifier = Modifier.size(26.dp)
-                            // He quitado el .clickable() de aquí dentro.
-                            // El NavigationBarItem ya maneja el click y queda más limpio.
-                        )
-                    },
-                    label = null,
-                    alwaysShowLabel = false,
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        indicatorColor = Color.Transparent
+                    } else if (screen.route == Screen.Library.route) {
+                        // 🔥 Si ya estamos en Library (o en su detalle) y clicamos el icono:
+                        // Limpiamos el stack hasta volver a la lista de Library
+                        navController.popBackStack(Screen.Library.route, inclusive = false)
+                    }
+                },
+                icon = {
+                    Icon(
+                        painter = painterResource(screen.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(26.dp)
+                        // He quitado el .clickable() de aquí dentro.
+                        // El NavigationBarItem ya maneja el click y queda más limpio.
                     )
+                },
+                label = null,
+                alwaysShowLabel = false,
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    indicatorColor = Color.Transparent
                 )
-            }
+            )
         }
     }
 }
-
-// ... tus previews están bien ...
