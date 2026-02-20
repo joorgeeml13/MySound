@@ -70,11 +70,10 @@ class PlaylistViewModel(private val repository: MusicRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 val result = repository.createPlaylist(name, description)
-                if (result != null) {
                     // Refrescamos la vista para incluir la nueva creación inmediatamente
                     loadUserPlaylists(userId)
                     Log.d("PlaylistVM", "Nueva lista creada satisfactoriamente: $name")
-                }
+
             } catch (e: Exception) {
                 Log.e("PlaylistVM", "Fallo en la creación de la lista de reproducción: ${e.message}")
             }
@@ -92,8 +91,6 @@ class PlaylistViewModel(private val repository: MusicRepository) : ViewModel() {
             try {
                 repository.addSongToPlaylist(playlistId, songId)
 
-                // Actualizamos el estado local para reflejar el cambio en el número de canciones
-                loadPlaylists()
                 Log.d("PlaylistVM", "Canción $songId integrada con éxito en la lista $playlistId")
             } catch (e: Exception) {
                 Log.e("PlaylistVM", "Error al vincular canción a la colección: ${e.message}")
